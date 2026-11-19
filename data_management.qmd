@@ -1,0 +1,38 @@
+---
+title: "data_management"
+format: pdf
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+library(tidyverse)
+library(terra)
+```
+
+```{r}
+red <- rast("data/LC09_L2SP_044033_20250714_20250716_02_T1/LC09_L2SP_044033_20250714_20250716_02_T1_SR_B4.tif")
+
+nir <- rast("data/LC09_L2SP_044033_20250714_20250716_02_T1/LC09_L2SP_044033_20250714_20250716_02_T1_SR_B5.tif")
+
+swir1 <- rast("data/LC09_L2SP_044033_20250714_20250716_02_T1/LC09_L2SP_044033_20250714_20250716_02_T1_SR_B6.tif")
+
+thermal <- rast("data/LC09_L2SP_044033_20250714_20250716_02_T1/LC09_L2SP_044033_20250714_20250716_02_T1_ST_B10.tif")
+
+nrow(red)
+nrow(nir)
+nrow(swir1)
+nrow(thermal)
+
+landsat <- c(red, nir, swir1, thermal)
+
+names(landsat) <- c("red","nir", "swir1", "thermal")
+
+df <- as.data.frame(landsat, xy = TRUE, na.rm = TRUE)
+
+#the values themselves are not meaningful yet as they still need to be scaled.
+glimpse(df)
+```
+
