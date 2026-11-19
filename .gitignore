@@ -2,6 +2,10 @@
 .Rhistory
 .Rapp.history
 
+#bigrasters
+*.tif
+*.TIF
+
 # Session Data files
 .RData
 .RDataTmp
