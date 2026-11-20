@@ -31,6 +31,8 @@ landsat <- c(red, nir, swir1, thermal)
 
 names(landsat) <- c("red","nir", "swir1", "thermal")
 
+plot(landsat)
+
 df <- as.data.frame(landsat, xy = TRUE, na.rm = TRUE)
 
 #the values themselves are not meaningful yet as they still need to be scaled.
