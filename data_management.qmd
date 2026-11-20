@@ -1,5 +1,6 @@
 ---
 title: "data_management"
+name: "Kristian Meza"
 format: pdf
 execute:
   echo: true
