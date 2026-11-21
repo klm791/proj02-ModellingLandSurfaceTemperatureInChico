@@ -9,6 +9,7 @@ execute:
 ---
 
 ```{r}
+## GLIMPSE WILL BE AT THE VERY BOTTOM
 library(tidyverse)
 library(terra)
 library(sf)
@@ -24,12 +25,12 @@ swir1_raw <- rast("data/LC09_L2SP_044033_20250714_20250716_02_T1/LC09_L2SP_04403
 
 thermal_raw <- rast("data/LC09_L2SP_044033_20250714_20250716_02_T1/LC09_L2SP_044033_20250714_20250716_02_T1_ST_B10.tif")
 
+landcover_raw <- rast("data/Annual_NLCD_LndCov_2025_CU_C1V2/Annual_NLCD_LndCov_2025_CU_C1V2.tif")
+
 cities <- st_read("data/California_Cities_and_Identifiers_Blue_Version_view_-3024944392275494958/California_City_Boundaries_and_Identifiers.shp")
 ```
 
-
 ```{r}
-
 #removes the raster cells exhibiting reflectance values outside of USGS's
 #acceptable range. ifel is just terra's version of ifsele
 red_raw <- ifel(red_raw < 7273 | red_raw > 43636, NA, red_raw)
@@ -66,6 +67,14 @@ chico_reproject <- project(chico_reproject, crs(landsat_stack))
 landsat_chico <- crop(landsat_stack, chico_reproject)
 landsat_chico <- mask(landsat_chico, chico_reproject)
 
+#reprojects the landcover raster and uses nearest neighbor resampling since
+#it's a categorical variable
+landcover_reproject <- project(landcover_raw, red_raw, method = "near")
+
+#crops and masks the raster so it fits within the Chico boundary
+landcover_chico <- crop(landcover_reproject, chico_reproject)
+landcover_chico <- mask(landcover_chico, chico_reproject)
+
 landsat_chico_df <- as.data.frame(landsat_chico, xy = TRUE, na.rm = TRUE)
 glimpse(landsat_chico_df)
 
@@ -78,5 +87,57 @@ plot(
     lines(chico_reproject)
   }
 )
+
+#plots the raster
+plot(
+  landcover_chico,
+  fun = function() {
+    lines(chico_reproject)
+  }
+)
+
+```
+
+```{r}
+#determines the column names and provides the counts
+levels(landcover_chico)
+freq(landcover_chico)
+
+#converts to data frame
+landcover_df <- as.data.frame(
+  landcover_chico,
+  xy = TRUE,
+  na.rm = TRUE
+)
+
+glimpse(landcover_df)
+
+#basic summary percentages
+landcover_summary <- landcover_df %>%
+  count(`NLCD Land Cover Class`) %>%
+  mutate(
+    percent = n / sum(n) * 100
+  ) %>%
+  arrange(desc(percent))
+
+landcover_summary_plotting <- landcover_summary %>%
+  filter(`NLCD Land Cover Class` == "Developed, Low Intensity" |
+           `NLCD Land Cover Class` == "Developed, Medium Intensity" |
+           `NLCD Land Cover Class` == "Grassland/Herbaceous" |
+           `NLCD Land Cover Class` == "Developed, Open Space" |
+           `NLCD Land Cover Class` == "Developed, High Intensity" |
+           `NLCD Land Cover Class` == "Shrub/Scrub" |
+           `NLCD Land Cover Class` == "Cultivated Crops") %>%
+  ggplot(aes(x = `NLCD Land Cover Class`, y = percent)) +
+  geom_col() +
+  coord_flip()
+
+landcover_summary_plotting
+
+landcover_summary
+```
+```{r}
+glimpse(landcover_summary)
+glimpse(landsat_chico_df)
 ```
 
