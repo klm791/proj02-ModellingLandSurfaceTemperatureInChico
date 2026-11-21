@@ -52,6 +52,7 @@ LST <- (LST_kelvin - 273.15)
 #stacks the rasters so I can modify them all at the same time
 landsat_stack <- c(NDVI, NDBI, LST)
 names(landsat_stack) <- c("NDVI", "NDBI", "LST")
+plot(landsat_stack)
 
 chico <- cities %>%
   filter(CDTFA_CITY == "Chico") %>%
